@@ -1,0 +1,361 @@
+name: Standing desk
+products:
+  - id: wi4xyngyvd8kp6ly
+entities:
+  - entity: cover
+    icon: mdi:desk
+    dps:
+      - id: 150
+        name: move_up
+        type: boolean
+        optional: true
+      - id: 151
+        name: move_down
+        type: boolean
+        optional: true
+      - id: 150
+        name: action
+        type: boolean
+        optional: true
+        readonly: true
+        # The desk never reports 150/151, so these only reflect pending
+        # commands. When idle, report "opened" so HA shows the position.
+        mapping:
+          - dps_val: true
+            value: opening
+          - dps_val: false
+            constraint: move_down
+            conditions:
+              - dps_val: true
+                value: closing
+              - dps_val: false
+                value: opened
+              - dps_val: null
+                value: opened
+          - dps_val: null
+            constraint: move_down
+            conditions:
+              - dps_val: true
+                value: closing
+              - dps_val: false
+                value: opened
+              - dps_val: null
+                value: opened
+          - value: opened
+      # Only one command at a time: do not send a second DP to stop a move.
+      - id: 150
+        name: control
+        type: boolean
+        optional: true
+        mapping:
+          - dps_val: true
+            value: open
+          - dps_val: false
+            constraint: move_down
+            conditions:
+              - dps_val: true
+                value: close
+          - dps_val: false
+            constraint: move_down
+            conditions:
+              - dps_val: false
+                value: stop
+      - id: 152
+        name: current_position
+        type: integer
+        range:
+          min: 650
+          max: 1310
+        mapping:
+          - target_range:
+              min: 0
+              max: 100
+  - entity: sensor
+    name: Height
+    class: distance
+    dps:
+      - id: 152
+        name: sensor
+        type: integer
+        unit: cm
+        mapping:
+          - scale: 10
+  # Memory recall is write-only: the desk never reports DP 155.
+  # A new command while moving cancels the move without starting the next.
+  - entity: button
+    name: Memory 1
+    icon: mdi:numeric-1-box-outline
+    dps:
+      - id: 155
+        name: button
+        type: string
+        optional: true
+        mapping:
+          - dps_val: mem1
+            value: true
+  - entity: button
+    name: Memory 2
+    icon: mdi:numeric-2-box-outline
+    dps:
+      - id: 155
+        name: button
+        type: string
+        optional: true
+        mapping:
+          - dps_val: mem2
+            value: true
+  - entity: button
+    name: Memory 3
+    icon: mdi:numeric-3-box-outline
+    dps:
+      - id: 155
+        name: button
+        type: string
+        optional: true
+        mapping:
+          - dps_val: mem3
+            value: true
+  - entity: button
+    name: Memory 4
+    icon: mdi:numeric-4-box-outline
+    dps:
+      - id: 155
+        name: button
+        type: string
+        optional: true
+        mapping:
+          - dps_val: mem4
+            value: true
+  - entity: switch
+    name: Memory save mode
+    icon: mdi:content-save
+    dps:
+      - id: 154
+        name: switch
+        type: boolean
+  # Four big-endian u16 heights (mm) in one eight-byte DP.
+  - entity: sensor
+    name: Memory 1 height
+    category: diagnostic
+    class: distance
+    dps:
+      - id: 159
+        name: sensor
+        type: base64
+        optional: true
+        mask: "FFFF000000000000"
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: sensor
+    name: Memory 2 height
+    category: diagnostic
+    class: distance
+    dps:
+      - id: 159
+        name: sensor
+        type: base64
+        optional: true
+        mask: "0000FFFF00000000"
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: sensor
+    name: Memory 3 height
+    category: diagnostic
+    class: distance
+    dps:
+      - id: 159
+        name: sensor
+        type: base64
+        optional: true
+        mask: "00000000FFFF0000"
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: sensor
+    name: Memory 4 height
+    category: diagnostic
+    class: distance
+    dps:
+      - id: 159
+        name: sensor
+        type: base64
+        optional: true
+        mask: "000000000000FFFF"
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: sensor
+    name: Standing time today
+    class: duration
+    dps:
+      - id: 145
+        name: sensor
+        type: integer
+        unit: min
+  - entity: sensor
+    name: Standing time target
+    class: duration
+    dps:
+      - id: 146
+        name: sensor
+        type: integer
+        unit: min
+  # Schedule bytes 1-2 and 3-4 are interval minutes (big-endian).
+  - entity: sensor
+    name: Sitting interval
+    category: diagnostic
+    class: duration
+    dps:
+      - id: 139
+        name: sensor
+        type: base64
+        optional: true
+        mask: "00FFFF0000000000000000000000"
+        unit: min
+  - entity: sensor
+    name: Standing interval
+    category: diagnostic
+    class: duration
+    dps:
+      - id: 139
+        name: sensor
+        type: base64
+        optional: true
+        mask: "000000FFFF000000000000000000"
+        unit: min
+  - entity: number
+    name: Standing height
+    category: config
+    dps:
+      - id: 115
+        name: value
+        type: integer
+        range:
+          min: 650
+          max: 1310
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: number
+    name: Minimum height
+    category: config
+    dps:
+      - id: 109
+        name: value
+        type: integer
+        range:
+          min: 650
+          max: 1310
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: number
+    name: Maximum height
+    category: config
+    dps:
+      - id: 108
+        name: value
+        type: integer
+        range:
+          min: 650
+          max: 1310
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: number
+    name: Desktop thickness
+    category: config
+    dps:
+      - id: 113
+        name: value
+        type: integer
+        range:
+          min: 10
+          max: 50
+        unit: cm
+        mapping:
+          - scale: 10
+            step: 5
+  - entity: number
+    name: Gyroscope sensitivity
+    category: config
+    dps:
+      - id: 110
+        name: value
+        type: integer
+        range:
+          min: 0
+          max: 8
+  - entity: number
+    name: Upward obstacle sensitivity
+    category: config
+    dps:
+      - id: 111
+        name: value
+        type: integer
+        range:
+          min: 0
+          max: 8
+  - entity: number
+    name: Downward obstacle sensitivity
+    category: config
+    dps:
+      - id: 112
+        name: value
+        type: integer
+        range:
+          min: 0
+          max: 8
+  - entity: sensor
+    name: Hardware minimum height
+    category: diagnostic
+    class: distance
+    dps:
+      - id: 107
+        name: sensor
+        type: integer
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: sensor
+    name: Hardware maximum height
+    category: diagnostic
+    class: distance
+    dps:
+      - id: 106
+        name: sensor
+        type: integer
+        unit: cm
+        mapping:
+          - scale: 10
+  - entity: select
+    name: Units
+    category: config
+    dps:
+      - id: 101
+        name: option
+        type: boolean
+        mapping:
+          - dps_val: false
+            value: cm
+          - dps_val: true
+            value: in
+  - entity: lock
+    translation_key: child_lock
+    category: config
+    dps:
+      - id: 6
+        name: lock
+        type: boolean
+  # "Reset all settings" in the app. Disabled by default: no confirmation in HA.
+  - entity: button
+    name: Reset settings
+    category: config
+    icon: mdi:restore
+    hidden: true
+    dps:
+      - id: 102
+        name: button
+        type: boolean
