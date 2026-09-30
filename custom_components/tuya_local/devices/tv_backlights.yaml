@@ -65,6 +65,9 @@ entities:
             value: Static color
           - dps_val: ambi_mode
             value: Ambient scene
+          - dps_val: setting_mode
+            value: Settings
+            hidden: true
   - entity: number
     name: Backlight intensity
     mode: slider
@@ -123,14 +126,27 @@ entities:
       - id: 127
         name: sensor
         type: string
-  - entity: sensor
-    category: diagnostic
+  - entity: select
+    category: config
     icon: mdi:palette
     name: RGB sequence
     dps:
       - id: 125
-        name: sensor
+        name: option
         type: string
+        mapping:
+          - dps_val: RGB
+            value: RGB
+          - dps_val: RBG
+            value: RBG
+          - dps_val: GRB
+            value: GRB
+          - dps_val: GBR
+            value: GBR
+          - dps_val: BRG
+            value: BRG
+          - dps_val: BGR
+            value: BGR
   - entity: sensor
     category: diagnostic
     icon: mdi:palette
@@ -139,13 +155,13 @@ entities:
       - id: 111
         name: sensor
         type: string
-  - entity: sensor
-    category: diagnostic
-    icon: mdi:power
-    name: Sync TV power
+  - entity: switch
+    category: config
+    icon: mdi:television
+    name: Sync with TV
     dps:
       - id: 126
-        name: sensor
+        name: switch
         type: boolean
   - entity: sensor
     category: diagnostic
@@ -155,44 +171,65 @@ entities:
       - id: 122
         name: sensor
         type: string
-  - entity: sensor
-    category: diagnostic
+  - entity: number
+    category: config
     name: Cap height
     icon: mdi:arrow-expand-vertical
     dps:
       - id: 118
-        name: sensor
+        name: value
         type: integer
-  - entity: sensor
-    category: diagnostic
+        range:
+          min: 1
+          max: 255
+  - entity: number
+    category: config
     icon: mdi:arrow-expand-horizontal
     name: Cap width
     dps:
       - id: 119
-        name: sensor
+        name: value
         type: integer
-  - entity: sensor
-    category: diagnostic
+        range:
+          min: 1
+          max: 255
+  - entity: number
+    category: config
     class: distance
     name: Horizontal LED length
     dps:
       - id: 116
-        name: sensor
+        name: value
         type: integer
         unit: m
+        range:
+          min: 1
+          max: 64
         mapping:
           - scale: 10
-  - entity: sensor
-    category: diagnostic
+  - entity: number
+    category: config
     class: distance
     name: Vertical LED length
     dps:
       - id: 117
-        name: sensor
+        name: value
         type: integer
         unit: m
+        range:
+          min: 1
+          max: 64
         mapping:
           - scale: 10
+  - entity: binary_sensor
+    category: diagnostic
+    name: Installation test
+    icon: mdi:test-tube
+    dps:
+      - id: 115
+        name: sensor
+        type: boolean
+        optional: true
   - entity: sensor
     category: diagnostic
     icon: mdi:speedometer-slow
