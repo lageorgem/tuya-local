@@ -3,8 +3,7 @@ Setup for different kinds of Tuya light devices
 """
 
 import logging
-from binascii import Error as BinasciiError
-from struct import calcsize, pack, unpack
+from struct import pack, unpack
 
 import homeassistant.util.color as color_util
 from homeassistant.components.light import (
@@ -212,14 +211,9 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
     def _unpacked_rgbhsv(self):
         """Get the unpacked rgbhsv data"""
         if self._rgbhsv_dps:
-            try:
-                color = self._rgbhsv_dps.decoded_value(self._device)
-            except BinasciiError:
-                return None
+            color = self._rgbhsv_dps.decoded_value(self._device)
             fmt = self._rgbhsv_dps.format
             if fmt and color:
-                if len(color) != calcsize(fmt["format"]):
-                    return None
                 vals = unpack(fmt.get("format"), color)
                 idx = 0
                 rgbhsv = {}
@@ -414,7 +408,7 @@ class TuyaLocalLight(TuyaLocalEntity, LightEntity):
                             )
                             val = r["min"]
                     else:
-                        val = (current or {}).get(n, fmt["ranges"][idx]["min"])
+                        val = current[n]
                     ordered.append(val)
                     idx += 1
                 binary = pack(fmt["format"], *ordered)
